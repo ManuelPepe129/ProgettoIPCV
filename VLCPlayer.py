@@ -8,6 +8,10 @@ class VLCPlayer:
         self.media = vlc.Media(path)
         self.media_player.set_media(self.media)
 
+    def __del__(self):
+        if self.is_playing():
+            self.stop()
+
     def is_playing(self):
         return self.media_player.is_playing() == 1
 
@@ -27,3 +31,6 @@ class VLCPlayer:
 
     def stop(self):
         self.media_player.stop()
+
+    def set_volume(self, volume):
+        self.media_player.audio_set_volume(int(volume))

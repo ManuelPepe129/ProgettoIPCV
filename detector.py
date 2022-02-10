@@ -1,6 +1,6 @@
 import cv2
 import math
-from handDetector import Hand
+from handDetector_OLD import Hand
 
 class Detector:
     def __init__(self, face_cascade, eye_cascade, videocapture):
