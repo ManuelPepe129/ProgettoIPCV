@@ -8,23 +8,26 @@ from HandTracking_MediaPipe import HandDetector
 from VLCPlayer import VLCPlayer
 from videocapture import VideoCapture
 
-pTime = 0
-cTime = 0
+# pTime = 0
+# cTime = 0
 videocapture = VideoCapture()
-detector = HandDetector(maxHands=1)
+detector = HandDetector(maxHands=1, detectionCon=0.9)
 player = VLCPlayer("videos/OP001.mp4")
 player.play()
+ROI_size = (250, 300)
 while videocapture.is_opened():
     # ottengo il frame dalla camera
     frame = videocapture.grab_frame()
     # cerco le mani con mediapipe
-    frame = detector.findHands(frame)
-    lmList = detector.findPosition(frame, draw=False, radius=8)
 
-    # TODO: limitare zona input
-    cv2.rectangle(frame, [0, 0, 250, 250], (0, 255, 255), 4)
+    # Limito la zona di input ad una ROI
+    cv2.rectangle(frame, [0, 0, ROI_size[0], ROI_size[1]], (0, 255, 255), 4)
+    ROI = frame[0:ROI_size[1], 0:ROI_size[0]] # NB: la prima è y
 
-    if len(lmList) != 0:
+    detector.findHands(ROI)
+    lmList = detector.findPosition(ROI, draw=False, radius=8)
+
+    if len(lmList) != 0 and not detector.discard:
         # TODO: Controlli su posizione reciproca tra pollice e indice
         # Controllo che la y dell'indice sia maggiore della y del pollice
         if lmList[8][2] <= lmList[4][2]:
@@ -49,10 +52,10 @@ while videocapture.is_opened():
             volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
             player.set_volume(volume)
 
-            # TODO: disegnare barra % volume mentre si aggiorna il volume
+            # Disegna una barra in base alla % volume mentre si aggiorna
             cv2.rectangle(frame, (50, 150), (85, 400), (255, 0, 0), cv2.FILLED)
             cv2.rectangle(frame, (50, 150), (85, 400 - int(volume / 100 * 250)), (255, 255, 255), cv2.FILLED)
-            cv2.putText(frame, f'{int(volume)}%', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
+            cv2.putText(frame, f'{player.get_volume()}%', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
     # Draw FPS
     """

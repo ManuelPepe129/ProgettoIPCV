@@ -17,6 +17,7 @@ class HandDetector():
                                         min_detection_confidence=self.detectionCon,
                                         min_tracking_confidence=self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
+        self.discard = False # se scartare o meno il frame attuale
 
     def findHands(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -31,7 +32,7 @@ class HandDetector():
         return img
 
     def findPosition(self, img, handNumber=0, draw=True, radius=5):
-
+        self.discard = False
         self.lmList = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNumber]
@@ -40,6 +41,12 @@ class HandDetector():
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 # print(id, cx, cy)
+                if cy > h or cx > w:
+                    # almeno un punto è fuori dalla ROI
+                    self.discard = True
+                    self.lmList = []
+                    return img
+
                 self.lmList.append([id, cx, cy])
                 if draw:
                     cv2.circle(img, (cx, cy), radius, (255, 0, 255), cv2.FILLED)
