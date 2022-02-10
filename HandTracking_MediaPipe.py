@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import mediapipe as mp
 import time
@@ -28,9 +30,9 @@ class HandDetector():
                                                self.mpHands.HAND_CONNECTIONS)
         return img
 
-    def findPosition(self, img, handNumber=0, draw=True, radius=15):
+    def findPosition(self, img, handNumber=0, draw=True, radius=5):
 
-        lmList = []
+        self.lmList = []
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNumber]
             for id, lm in enumerate(myHand.landmark):
@@ -38,11 +40,23 @@ class HandDetector():
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 # print(id, cx, cy)
-                lmList.append([id, cx, cy])
+                self.lmList.append([id, cx, cy])
                 if draw:
                     cv2.circle(img, (cx, cy), radius, (255, 0, 255), cv2.FILLED)
 
-        return lmList
+        return self.lmList
+
+    def findDistance(self, id1, id2, img, draw=True):
+        # Calcolo la distanza tra il landmark1 e il landmark2
+        x1, y1 = self.lmList[id1][1], self.lmList[id1][2]
+        x2, y2 = self.lmList[id2][1], self.lmList[id2][2]
+
+        if draw:
+            # disegno una linea tra i due punti
+            cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+
+        length = math.hypot(x2 - x1, y2 - y1)
+        return length
 
 
 def main():

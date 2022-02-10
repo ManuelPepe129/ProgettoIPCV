@@ -25,41 +25,34 @@ while videocapture.is_opened():
     cv2.rectangle(frame, [0, 0, 250, 250], (0, 255, 255), 4)
 
     if len(lmList) != 0:
-        # Filter based on size
-
-        # Calcolo la distanza tra pollice e indice
-        x1, y1 = lmList[4][1], lmList[4][2]
-        x2, y2 = lmList[8][1], lmList[8][2]
-
         # TODO: Controlli su posizione reciproca tra pollice e indice
+        # Controllo che la y dell'indice sia maggiore della y del pollice
+        if lmList[8][2] <= lmList[4][2]:
+            # Calcolo la distanza tra pollice e indice
+            thumb_index_distance = detector.findDistance(4, 8, frame)
 
-        length = math.hypot(x2 - x1, y2 - y1)
-        color = (255, 0, 255)
-        # disegno una linea tra pollice e indice
-        cv2.line(frame, (x1, y1), (x2, y2), color, 3)
+            """
+                utilizzo la distanza tra il polso e il metacarpo del mignolo
+                per normalizzare la distanza tra pollice indice
+                senza dover avere la distanza dalla camera
+            """
 
-        # Calcolo la distanza tra il polso e il metacarpo del mignolo (per normalizzare la distanza tra pollice e indice)
+            # Calcolo la distanza tra il polso e il metacarpo del mignolo (per normalizzare la distanza tra pollice e indice)
 
-        # prendo la posizione del polso
-        wrist_point = (lmList[0][1], lmList[0][2])
-        # prendo la posizione del metacarpo del mignolo
-        pinky_mcp_point = (lmList[17][1], lmList[17][2])
+            dist = detector.findDistance(0, 17, frame, False)
+            minDist = dist / 100 * 15  # distanza minima per avere volume zero
+            maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
 
-        """
-        utilizzo la distanza tra il polso e il metacarpo del mignolo
-        per normalizzare la distanza tra pollice indice
-        senza dover avere la distanza dalla camera
-        """
+            # TODO: provare ad usare gli ultimi N valori per impostare il volume come la media di essi
 
-        dist = math.hypot(pinky_mcp_point[0] - wrist_point[0], pinky_mcp_point[1] - wrist_point[1])
-        minDist = dist / 100 * 15  # distanza minima per avere volume zero
-        maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
+            # Imposto il volume
+            volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
+            player.set_volume(volume)
 
-        # TODO: provare ad usare gli ultimi N valori per impostare il volume come la media di essi
-        # TODO: disegnare barra % volume mentre si aggiorna il volume
-        # Imposto il volume
-        volume = np.interp(length, [minDist, maxDist], [0, 100])
-        player.set_volume(volume)
+            # TODO: disegnare barra % volume mentre si aggiorna il volume
+            cv2.rectangle(frame, (50, 150), (85, 400), (255, 0, 0), cv2.FILLED)
+            cv2.rectangle(frame, (50, 150), (85, 400 - int(volume / 100 * 250)), (255, 255, 255), cv2.FILLED)
+            cv2.putText(frame, f'{int(volume)}%', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
     # Draw FPS
     """
