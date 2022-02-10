@@ -34,3 +34,6 @@ class VLCPlayer:
 
     def set_volume(self, volume):
         self.media_player.audio_set_volume(int(volume))
+
+    def get_volume(self):
+        return self.media_player.audio_get_volume()
