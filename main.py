@@ -41,6 +41,9 @@ def main():
 
     fingerIDs = [8, 12, 16, 20]
 
+    pausedForHands = False
+    pausedForPresence = False
+
     while videocapture.is_opened():
 
         elapsed_time = time.time() - current_time
@@ -48,101 +51,101 @@ def main():
 
         # get the current frame
         frame = videocapture.grab_frame()
+        frame = cv2.flip(frame, +1);
         videocapture.equalize_frame()
         frame_equalized = detector.draw_face_rect()
 
-        # il video si mette in pausa se si esce dall'inquadratura della camera per un tot di secondi
-        # oppure se si chiudono entrambi gli occhi
+        if not pausedForHands:
+            presence_timer = face_eyes_detector(detector, elapsed_time, presence_timer)
 
-        # ottengo la faccia
-        detector.detect_face()
-        # se ho una faccia -> ottengo gli occhi
-        if len(detector.faces) > 0:
-            detector.detect_eyes()
-            if len(detector.eyes) > 0:
-                # ho trovato degli occhi
-                presence_timer = 0
+            # print(presence_timer)
+            if presence_timer >= 3:
+                player.pause()
+                pausedForPresence = True
             else:
-                # gli occhi sono chiusi
-                presence_timer += elapsed_time
+                player.play()
+                pausedForPresence = False
         else:
-            presence_timer += elapsed_time
-
-        # print(presence_timer)
-        if presence_timer >= 3:
-            player.pause()
-        else:
-            player.play()
+            presence_timer = 0
 
         """
             HAND DETECTION
         """
 
-        # Limito la zona di input ad una ROI
         cv2.rectangle(frame, [0, 0, ROI_size[0], ROI_size[1]], (0, 255, 255), 4)
         ROI = frame[0:ROI_size[1], 0:ROI_size[0]]  # NB: la prima è y
 
-        handDetector.findHands(ROI)
-        lmList = handDetector.findPosition(ROI, draw=False, radius=8)
+        if not pausedForPresence:
+            # Limito la zona di input ad una ROI
 
-        if len(lmList) != 0 and not handDetector.discard:
-            """
-                Controlli per volume
-            """
-            # Controlli su posizione reciproca tra pollice e indice
-            # Controllo che la y dell'indice sia maggiore della y del pollice
-            if lmList[8][2] <= lmList[4][2]:
-                # Calcolo la distanza tra pollice e indice
-                thumb_index_distance = handDetector.findDistance(4, 8, frame)
+            handDetector.findHands(ROI)
+            lmList = handDetector.findPosition(ROI, draw=False, radius=8)
 
+            if len(lmList) != 0 and not handDetector.discard:
                 """
-                    utilizzo la distanza tra il polso e il metacarpo del mignolo
-                    per normalizzare la distanza tra pollice indice
-                    senza dover avere la distanza dalla camera
+                    Controlli per volume
                 """
+                # Controlli su posizione reciproca tra pollice e indice
+                # Controllo che la y dell'indice sia maggiore della y del pollice
+                if lmList[8][2] <= lmList[4][2]:
+                    # Calcolo la distanza tra pollice e indice
+                    thumb_index_distance = handDetector.findDistance(4, 8, frame)
 
-                # Calcolo la distanza tra il polso e il metacarpo del mignolo (per normalizzare la distanza tra pollice e indice)
+                    """
+                        utilizzo la distanza tra il polso e il metacarpo del mignolo
+                        per normalizzare la distanza tra pollice indice
+                        senza dover avere la distanza dalla camera
+                    """
 
-                dist = handDetector.findDistance(0, 17, frame, False)
-                minDist = dist / 100 * 15  # distanza minima per avere volume zero
-                maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
+                    # Calcolo la distanza tra il polso e il metacarpo del mignolo (per normalizzare la distanza tra
+                    # pollice e indice)
 
-                # TODO: provare ad usare gli ultimi N valori per impostare il volume come la media di essi
+                    dist = handDetector.findDistance(0, 17, frame, False)
+                    minDist = dist / 100 * 15  # distanza minima per avere volume zero
+                    maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
 
-                # Imposto il volume
-                volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
-                player.set_volume(volume)
+                    # TODO: provare ad usare gli ultimi N valori per impostare il volume come la media di essi
 
-                # Disegna una barra in base alla % volume mentre si aggiorna
-                cv2.rectangle(frame, (50, 150), (85, 400), (255, 0, 0), cv2.FILLED)
-                cv2.rectangle(frame, (50, 150), (85, 400 - int(volume / 100 * 250)), (255, 255, 255), cv2.FILLED)
-                cv2.putText(frame, f'{player.get_volume()}%', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
+                    # Imposto il volume
+                    volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
+                    player.set_volume(volume)
 
-            fingersOpened = 0
-            fingersClosed = 0
+                    # Disegna una barra in base alla % volume mentre si aggiorna
+                    cv2.rectangle(frame, (50, 150), (85, 400), (255, 0, 0), cv2.FILLED)
+                    cv2.rectangle(frame, (50, 150), (85, 400 - int(volume / 100 * 250)), (255, 255, 255), cv2.FILLED)
+                    cv2.putText(frame, f'{player.get_volume()}%', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0),
+                                2)
 
-            # controllo che il pollice sia aperto o chiuso
-            if lmList[4][2] > lmList[3][1]:
-                fingersOpened += 1
-            else:
-                fingersClosed += 1
+                fingersOpened = 0
+                fingersClosed = 0
 
-            for finger in fingerIDs:
-                if fingersOpened >= 1 and fingersClosed >= 1:
-                    break
-                elif lmList[finger][2] < lmList[finger - 2][2]:
+                # controllo che il pollice sia aperto o chiuso
+                if lmList[4][1] > lmList[3][1]:
                     fingersOpened += 1
+                    print("Thumb opened")
                 else:
                     fingersClosed += 1
+                    print("Thumb closed")
 
-            if fingersOpened == 5:
-                player.play()
-            elif fingersClosed == 5:
-                player.pause()
+                for finger in fingerIDs:
+                    if fingersOpened >= 1 and fingersClosed >= 1:
+                        break
+                    elif lmList[finger][2] < lmList[finger - 2][2]:
+                        fingersOpened += 1
+                        print(f"Finger {finger} opened")
+                    else:
+                        fingersClosed += 1
+                        print(f"Finger {finger} closed")
+
+                if fingersOpened == 5:
+                    player.play()
+                    pausedForHands = True
+                elif fingersClosed == 5:
+                    player.pause()
+                    pausedForHands = False
 
         if ax_img is None:
-            # convert the current (first) frame in grayscale
-            ax_img = plt.imshow(frame, "gray")
+            ax_img = plt.imshow(frame)
             plt.axis("off")  # hide axis, ticks, ...
             plt.title("Camera Capture")
             # show the plot!
@@ -152,6 +155,25 @@ def main():
             ax_img.set_data(frame)
             videocapture.update_figure()
             plt.pause(1 / 30)  # pause: 30 frames per second
+
+
+def face_eyes_detector(detector, elapsed_time, presence_timer):
+    # il video si mette in pausa se si esce dall'inquadratura della camera per un tot di secondi
+    # oppure se si chiudono entrambi gli occhi
+    # ottengo la faccia
+    detector.detect_face()
+    # se ho una faccia -> ottengo gli occhi
+    if len(detector.faces) > 0:
+        detector.detect_eyes()
+        if len(detector.eyes) > 0:
+            # ho trovato degli occhi
+            presence_timer = 0
+        else:
+            # gli occhi sono chiusi
+            presence_timer += elapsed_time
+    else:
+        presence_timer += elapsed_time
+    return presence_timer
 
 
 if __name__ == "__main__":
