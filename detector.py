@@ -2,6 +2,7 @@ import cv2
 import math
 from handDetector_OLD import Hand
 
+
 class Detector:
     def __init__(self, face_cascade, eye_cascade, videocapture):
         self.face_cascade = face_cascade
@@ -9,13 +10,13 @@ class Detector:
         self.videocapture = videocapture
 
     def detect_face(self):
-        self.faces = self.face_cascade.detectMultiScale(self.videocapture.frame_equalized, scaleFactor=1.3, minSize=(144, 80))
+        self.faces = self.face_cascade.detectMultiScale(self.videocapture.frame_equalized, scaleFactor=1.3,
+                                                        minSize=(144, 80))
 
     def detect_eyes(self):
         for (x, y, w, h) in self.faces:
             current_face = self.videocapture.frame_equalized[y:y + h, x:x + w]
             self.eyes = self.eye_cascade.detectMultiScale(current_face)
-
 
     def draw_face_rect(self):
         """
@@ -25,15 +26,16 @@ class Detector:
         :param eye_cascade: the eye classifier
         :return: the captured image
         """
-        self.faces = self.face_cascade.detectMultiScale(self.videocapture.frame_equalized, scaleFactor=1.3, minSize=(144, 80))
+        self.faces = self.face_cascade.detectMultiScale(self.videocapture.frame_equalized, scaleFactor=1.3,
+                                                        minSize=(144, 80))
         for (x, y, w, h) in self.faces:
             cv2.rectangle(self.videocapture.frame_equalized, (x, y), (x + w, y + h), (255, 0, 0), 2)
             current_face = self.videocapture.frame_equalized[y:y + h, x:x + w]
             eyes = self.eye_cascade.detectMultiScale(current_face)
             for (x2, y2, w2, h2) in eyes:
-                cv2.rectangle(self.videocapture.frame_equalized, (x + x2, y + y2), (x + x2 + w2, y + y2 + h2), (0, 0, 255), 4)
+                cv2.rectangle(self.videocapture.frame_equalized, (x + x2, y + y2), (x + x2 + w2, y + y2 + h2),
+                              (0, 0, 255), 4)
         return self.videocapture.frame_equalized
-
 
 
 def detect_face(frame, block=False, colour=(0, 0, 0)):
@@ -114,6 +116,3 @@ def locate_object(frame, object_hist):
 def detect_hand(frame, hist):
     detected_hand, masked, raw = locate_object(frame, hist)
     return Hand(detected_hand, masked, raw, frame)
-
-
-

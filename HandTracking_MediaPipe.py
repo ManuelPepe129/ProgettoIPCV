@@ -17,7 +17,7 @@ class HandDetector():
                                         min_detection_confidence=self.detectionCon,
                                         min_tracking_confidence=self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
-        self.discard = False # se scartare o meno il frame attuale
+        self.discard = False  # se scartare o meno il frame attuale
 
     def findHands(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
