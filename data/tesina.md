@@ -2,17 +2,23 @@
 
 ## 1. Introduzione
 
-Negli ultimi anni la necessità di applicazioni accessibili ad un numero sempre maggiore di persone ha portato allo sviluppo di nuove forme di interazioni che si inseriscono in un quadro di sviluppo molto ampio denominato "interazione multimodale". L’intento di questo progetto è quello di sfruttare l’*image processing* e la *computer vision* al fine di realizzare un’applicazione che riconosca i gesti di un utente per controllare un’applicazione multimediale senza l'utilizzo di dispositivi come mouse o tastiera. In concreto, attraverso l’utilizzo di una semplice webcam sul proprio computer si può controllare la riproduzione multimediale di un video. ==L’applicazione multimediale di riferimento è VLC e le funzionalità, che verranno illustrate in seguito, spaziano dall’interruzione della riproduzione quando il volto dell’utente non è più rilevato all’interno dello spazio di visualizzazione della webcam fino alla modifica del volume attraverso l’utilizzo della mano==. Nei prossimi capitoli verranno illustrati a fondo gli obiettivi prefissati, le funzionalità principali che si è deciso di implementare, i requisiti e infine l’implementazione vera e propria con tutte le scelte effettuate.
+Negli ultimi anni la necessità di applicazioni accessibili ad un numero sempre maggiore di persone ha portato allo sviluppo di nuove forme di interazioni che si inseriscono in un quadro di sviluppo molto ampio denominato "interazione multimodale". L’intento di questo progetto è quello di sfruttare l’*image processing* e la *computer vision* al fine di realizzare un’applicazione che riconosca il volto di un utente ed alcuni gesti al fine di controllare un’applicazione multimediale senza l'utilizzo di dispositivi come mouse o tastiera. In concreto, attraverso l’utilizzo di una semplice webcam sul proprio computer si può controllare la riproduzione multimediale di un video . L’applicazione multimediale di riferimento è VLC e le funzionalità, che verranno illustrate in seguito, spaziano dall’interruzione della riproduzione quando il volto dell’utente non è più rilevato all’interno dello spazio di visualizzazione della webcam fino alla modifica del volume attraverso l’utilizzo della mano. Nei prossimi capitoli verranno illustrati a fondo gli obiettivi prefissati, le funzionalità principali che si è deciso di implementare, i requisiti e infine l’implementazione vera e propria con tutte le scelte effettuate.
 
 ## 2. Obiettivi
-Partendo da quello che volevamo fosse il risultato finale del nostro progetto, ovvero un’applicazione che permettesse ad un utente di controllare un video riprodotto su VLC attraverso delle “gestures” abbiamo definito i seguenti macro obiettivi per raggiungere il nostro scopo, ai quali successivamente si sono aggiunti ulteriori micro obiettivi che vedremo meglio nella fase di implementazione:
+Partendo da quello che volevamo fosse il risultato finale del nostro progetto, ovvero un’applicazione che permettesse ad un utente di controllare un video riprodotto su VLC attraverso delle “gestures” abbiamo definito i seguenti obiettivi per raggiungere il nostro scopo:
 
-* **Riconoscimento del volto:** in primo luogo abbiamo ritenuto necessario il riconoscimento della presenza di un volto all’interno di ogni frame video, in quanto una delle funzionalità che si è deciso di implementare riguarda l’interruzione automatica del video qualora il volto dell’utente non venga rilevato. Questo perché si è immaginato che un’applicazione del genere debba tenere conto del comportamento dell’utente e debba reagire di conseguenza, anche se l’utente non ha impartito esplicitamente alcun comando. Ad esempio, se l’utente è distratto o improvvisamente qualcuno entra nella sua stanza e si gira per comunicare, il video si interrompe e riprenderà una volta che l’utente sarà di nuovo disponibile. 
-* **Riconoscimento degli occhi:** successivamente abbiamo ritenuto necessario il riconoscimento dell'apertura o chiusura degli occhi in quanto, qualora l’utente fosse stanco e chiudesse gli occhi, il video non avrebbe motivo di proseguire nella sua riproduzione.
-* **Riconoscimento della mano:** infine abbiamo ritenuto necessario il riconoscimento della mano, in quanto strumento attivo dell’interazione tra utente e sistema. In particolare, oltre al riconoscimento della forma completa della mano al fine di permettere all’utente di mettere in pausa la riproduzione e riavviarla (tramite una gesture che verrà illustrata in seguito), abbiamo ritenuto necessario individuare le dita per sviluppare un meccanismo di controllo del volume di riproduzione. 
+* **<u>Riconoscimento del volto</u>:** abbiamo ritenuto necessario il riconoscimento della presenza di un volto all’interno di ogni frame video, in quanto una delle funzionalità che si è deciso di implementare riguarda l’interruzione automatica del video qualora il volto dell’utente non venga rilevato. Questo perché si è immaginato che un’applicazione del genere debba tenere conto del comportamento dell’utente e debba reagire di conseguenza, anche se l’utente non ha impartito esplicitamente alcun comando. Ad esempio, se l’utente è distratto o improvvisamente qualcuno entra nella sua stanza e si gira per comunicare, il video si interrompe e riprenderà una volta che l’utente sarà di nuovo disponibile. 
+* **<u>Riconoscimento degli occhi:</u>** abbiamo ritenuto necessario il riconoscimento dell'apertura o chiusura degli occhi in quanto, qualora l’utente fosse stanco e chiudesse gli occhi, il video non avrebbe motivo di proseguire nella sua riproduzione.
+* **<u>Riconoscimento della mano:</u>** abbiamo ritenuto necessario il riconoscimento della mano, in quanto strumento attivo dell’interazione tra utente e sistema. In particolare, oltre al riconoscimento della forma completa della mano al fine di permettere all’utente di mettere in pausa la riproduzione e riavviarla (tramite una gesture che verrà illustrata in seguito), abbiamo ritenuto necessario individuare le dita per sviluppare un meccanismo di controllo del volume di riproduzione. 
+
+I comandi che abbiamo deciso di implementare sono le seguenti:
+
+- **<u>Pausa del video automatica</u>** se si esce dall'inquadratura della camera  oppure se si chiudono entrambi gli occhi per un numero di secondi stabilito.
+- **<u>Regolazione del volume</u>** in base alla distanza tra pollice e indice.
+- **<u>Pausa del video gestita dall'utente</u>** mediante apertura/chiusura della mano.
 
 ## 3. Requisiti 
-Oltre a disporre di una webcam, che costituisce un requisito fondamentale per il funzionamento dell’applicazione, è necessario che l’utente sia all’interno di una stanza adeguatamente illuminata evitando una fonte di illuminazione alle spalle, ma piuttosto favorendone una frontale che permetta di avere un giusto livello di contrasto tra l’utente e lo sfondo. E’ inoltre necessario che l’utente sia ben inserito all’interno del frame, ad una distanza di circa mezzo metro dallo schermo, e che abbia una mano libera per poter effettuare le *gestures* di controllo della riproduzione video e del volume. Inoltre, per il corretto funzionamento dell'applicazione, è necessario aver installato *VLC Media Player*.
+Oltre a disporre di una webcam, che costituisce un requisito fondamentale per il funzionamento dell’applicazione, è necessario che l’utente sia all’interno di una stanza adeguatamente illuminata evitando una fonte di illuminazione alle spalle, ma piuttosto favorendone una frontale che permetta di avere un giusto livello di contrasto tra l’utente e lo sfondo. E’ inoltre necessario che l’utente sia ben inserito all’interno del frame, ad una distanza di circa mezzo metro dallo schermo, e che abbia una mano libera per poter effettuare le *gestures* di controllo della riproduzione video e del volume. Inoltre, per il funzionamento dell'applicazione, è necessario aver installato *VLC Media Player*.
 
 ## 4. Tecnologie utilizzate 
 
@@ -94,7 +100,7 @@ Infine abbiamo introdotto una barra all’interno dell’interfaccia che mostra 
 
 #### 5.2.2 Blocco della riproduzione
 
-Il blocco della riproduzione e la ripresa vengono gestiti mediante l'apertura e la chiusura della mano. In particolare, il video viene messo in pausa alla chiusura della mano, e riprodotto nuovamente quando viene aperta. Il riconoscimento della chiusura della mano è basato sullo studio della posizione sulla coordinata $y$ della punta di ogni dito e la relativa giunzione tra falange prossimale e intermedia. 
+Il blocco della riproduzione e la ripresa vengono gestiti mediante l'apertura e la chiusura della mano. In particolare, il video viene messo in pausa alla chiusura della mano, e riprodotto nuovamente quando viene aperta. Il riconoscimento della chiusura della mano è basato sullo studio della posizione sulla coordinata $y$ della punta di ogni dito e la relativa giunzione tra falange prossimale e intermedia. Considerando la posizione della mano con il palmo rivolto verso lo schermo e le dita verso l'alto, si può quindi dire che il singolo dito è chiuso su se stesso quando la posizione y della punta è minore di quella della relativa giunzione tra falange prossimale e intermedia. 
 
 ```python
 fingerIDs = [8, 12, 16, 20] # landmarks delle punte delle dita
@@ -109,7 +115,7 @@ for finger in fingerIDs:
         fingersClosed += 1 # dito chiuso
 ```
 
-Questo controllo non è però applicabile al pollice perché la posizione risultante non sarebbe naturale, quindi si è optato per un controllo basato sulle coordinate $x$.
+Questo controllo non è però applicabile al pollice perché la posizione risultante non sarebbe naturale. Infatti considerando una mano chiusa a pugno, il pollice risulta piegato verso il palmo e non verso il basso. Quindi si è optato per un controllo analogo a quello visto precedentemente ma basato sulle coordinate $x$. 
 
 ```python
  # controllo che il pollice sia aperto o chiuso
@@ -128,11 +134,11 @@ elif fingersClosed == 5:
     player.pause()
 ```
 
-## 6. Validazione funzionale 
 
-## 7. Conclusioni e sviluppi futuri
 
-Pur essendo consapevoli di alcuni limiti dell'applicazione ci riteniamo complessivamente soddisfatti del lavoro svolto in quando l'utente è in grado, seguendo dei requisiti minimi di utilizzo, di eseguire le operazioni di controllo con estrema semplicità. Un possibile sviluppo futuro sarebbe quello di sviluppare un'interfaccia utente che si attivi ogni volta che il sistema riconosce che l'utente sta impartendo un comando al sistema e mostri graficamente l'effetto di questi comandi con elementi grafici, così da restituire un'azione di feedback all'utente. Al dì fuori di questi momenti di controllo l'interfaccia rimane ridotta ad icona e non interferisce con la visione del video. Inoltre sarebbe interessante aumentare il numero di gestures che l'utente può effettuare andando a mappare tutte le azioni possibili di controllo del riproduttore video, come il controllo della velocità di riproduzione oppure l'aggiunta di sottotitoli. 
+## 6. Conclusioni e sviluppi futuri
+
+Pur essendo consapevoli di alcuni limiti dell'applicazione ci riteniamo complessivamente soddisfatti del lavoro svolto in quando l'utente è in grado, seguendo dei requisiti minimi di utilizzo, di eseguire le operazioni di controllo con estrema semplicità. Un possibile sviluppo futuro sarebbe quello di realizzare un'interfaccia utente che si attivi ogni volta che il sistema riconosce che l'utente sta impartendo un comando al sistema e mostri graficamente l'effetto di questi comandi con elementi grafici, così da restituire un'azione di feedback all'utente. Al dì fuori di questi momenti di controllo l'interfaccia rimane ridotta ad icona e non interferisce con la visione del video. Inoltre sarebbe interessante aumentare il numero di gestures che l'utente può effettuare andando a mappare tutte le azioni possibili di controllo del riproduttore video, come il controllo della velocità di riproduzione oppure l'aggiunta di sottotitoli. 
 
 
 
