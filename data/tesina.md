@@ -40,7 +40,12 @@ Per la realizzazione del progetto è stato utilizzato ***Python 3.10*** sfruttan
 
 ## 5. Implementazione
 
-==Classi realizzate==
+Nello sviluppo del progetto sono state realizzate le seguenti classi Python:
+
+* *Detector*: incapsula i metodi principali per la *detection* del volto e degli occhi
+* *HandDetector*: esegue il riconoscimento e il *tracking* della mano utilizzando la libreria *MediaPipe*
+* *VLCPlayer*: sfrutta la libreria *python-vlc* per interfacciarsi con *VLC media player*
+* *VideoCapture*: cattura e gestisce la webcam
 
 ### 5.1 Riconoscimento del volto e degli occhi
 
