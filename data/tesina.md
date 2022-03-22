@@ -11,7 +11,7 @@ Partendo da quello che volevamo fosse il risultato finale del nostro progetto, o
 * **<u>Riconoscimento degli occhi:</u>** abbiamo ritenuto necessario il riconoscimento dell'apertura o chiusura degli occhi in quanto, qualora l’utente fosse stanco e chiudesse gli occhi, il video non avrebbe motivo di proseguire nella sua riproduzione.
 * **<u>Riconoscimento della mano:</u>** abbiamo ritenuto necessario il riconoscimento della mano, in quanto strumento attivo dell’interazione tra utente e sistema. In particolare, oltre al riconoscimento della forma completa della mano al fine di permettere all’utente di mettere in pausa la riproduzione e riavviarla (tramite una gesture che verrà illustrata in seguito), abbiamo ritenuto necessario individuare le dita per sviluppare un meccanismo di controllo del volume di riproduzione. 
 
-I comandi che abbiamo deciso di implementare sono le seguenti:
+I comandi che abbiamo deciso di implementare sono i seguenti:
 
 - **<u>Pausa del video automatica</u>** se si esce dall'inquadratura della camera  oppure se si chiudono entrambi gli occhi per un numero di secondi stabilito.
 - **<u>Regolazione del volume</u>** in base alla distanza tra pollice e indice.
