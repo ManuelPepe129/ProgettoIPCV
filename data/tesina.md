@@ -1,4 +1,22 @@
-# Relazione Computer Vision
+# Relazione Progetto Moovie
+
+#### Corso Image Processing & Computer Vision 2020/2021
+
+
+
+
+
+
+
+
+
+#### **Autori:**  
+
+##### Manuel Pepe
+
+##### Marco Cupelli
+
+
 
 ## 1. Introduzione
 

@@ -17,12 +17,11 @@ class HandDetector():
                                         min_detection_confidence=self.detectionCon,
                                         min_tracking_confidence=self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
-        self.discard = False  # se scartare o meno il frame attuale
+        self.discard = False
 
     def findHands(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
-        # print(results.multi_hand_landmarks)
 
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
@@ -37,12 +36,12 @@ class HandDetector():
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNumber]
             for id, lm in enumerate(myHand.landmark):
-                # print(id, lm)
+
                 h, w, c = img.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
-                # print(id, cx, cy)
+
                 if cy > h or cx > w:
-                    # almeno un punto è fuori dalla ROI
+                    # Ho rilevato che almeno un punto è fuori dalla ROI
                     self.discard = True
                     self.lmList = []
                     return img
@@ -61,7 +60,7 @@ class HandDetector():
         if draw:
             # disegno una linea tra i due punti
             cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
-
+        #calcolo la distanza in x e in y tra i due punti
         length = math.hypot(x2 - x1, y2 - y1)
         return length
 
@@ -75,10 +74,7 @@ def main():
         success, img = cap.read()
         img = detector.findHands(img)
         lmList = detector.findPosition(img)
-
-        # if len(lmList) != 0:
-        #    print(lmList[4])
-
+        
         cTime = time.time()
         fps = 1 / (cTime - pTime)
         pTime = cTime

@@ -15,14 +15,16 @@ class VLCPlayer:
     def is_playing(self):
         return self.media_player.is_playing() == 1
 
+    # Faccio partire la riproduzione del video 
     def play(self):
         self.media_player.play()
 
     def next(self):
         self.media_player.next()
-
+    
+    # Metto il video in pausa
     def pause(self):
-        # check if is playing
+        # Verifico che sta avvenendo la riproduzione 
         if self.is_playing():
             self.media_player.pause()
 

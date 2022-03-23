@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 
 class VideoCapture:
     def __init__(self):
-        # init the camera
+        # Inizializzo la camera
         self.frame_equalized = None
         self.frame = None
         self.cap = cv2.VideoCapture(0)
-        # create a figure to be updated
+        # Creo una figure che deve essere aggiornata
         self.fig = plt.figure()
         self.fig.canvas.mpl_connect("close_event", lambda event: self.handle_close(event))
 
