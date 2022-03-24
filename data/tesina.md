@@ -1,12 +1,30 @@
 # Relazione Progetto Moovie
 
-#### Corso Image Processing & Computer Vision 2020/2021
 
-<img src="logo_tesina.jpg" alt="image-20220318170556955" style="zoom: 60%;"/>**Autori:**  
 
-##### Manuel Pepe
 
-##### Marco Cupelli
+
+<img src="logo_tesina.jpg" alt="image-20220318170556955" style="zoom: 80%;"/>
+
+
+
+### **Corso Image Processing & Computer Vision 2020/2021**
+
+
+
+
+
+
+
+
+
+##### *Autori:*  
+
+##### *Manuel Pepe*
+
+##### *Marco Cupelli*
+
+
 
 
 
