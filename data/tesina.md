@@ -2,15 +2,7 @@
 
 #### Corso Image Processing & Computer Vision 2020/2021
 
-
-
-
-
-
-
-
-
-#### **Autori:**  
+<img src="logo_tesina.jpg" alt="image-20220318170556955" style="zoom: 60%;"/>**Autori:**  
 
 ##### Manuel Pepe
 
@@ -161,7 +153,7 @@ elif fingersClosed == 5:
 
 ## 6. Conclusioni e sviluppi futuri
 
-Pur essendo consapevoli di alcuni limiti dell'applicazione ci riteniamo complessivamente soddisfatti del lavoro svolto in quando l'utente è in grado, seguendo dei requisiti minimi di utilizzo, di eseguire le operazioni di controllo con estrema semplicità. Un possibile sviluppo futuro sarebbe quello di realizzare un'interfaccia utente che si attivi ogni volta che il sistema riconosce che l'utente sta impartendo un comando al sistema e mostri graficamente l'effetto di questi comandi con elementi grafici, così da restituire un'azione di feedback all'utente. Al dì fuori di questi momenti di controllo l'interfaccia rimane ridotta ad icona e non interferisce con la visione del video. Inoltre sarebbe interessante aumentare il numero di gestures che l'utente può effettuare andando a mappare tutte le azioni possibili di controllo del riproduttore video, come il controllo della velocità di riproduzione oppure l'aggiunta di sottotitoli. 
+Ci riteniamo complessivamente soddisfatti del lavoro svolto in quando l'utente è in grado, seguendo dei requisiti minimi di utilizzo, di eseguire le operazioni di controllo con estrema semplicità. Un possibile sviluppo futuro sarebbe quello di realizzare un'interfaccia utente che si attivi ogni volta che l'utente cerca di impartire un comando al sistema e mostri graficamente l'effetto di questi comandi, così da restituire un'azione di feedback all'utente. Al dì fuori di questi momenti di controllo l'interfaccia rimane ridotta ad icona e non interferisce con la visione del video. Inoltre sarebbe interessante aumentare il numero di gestures che l'utente può effettuare andando a mappare tutte le azioni possibili di controllo del riproduttore video, come il controllo della velocità di riproduzione oppure l'aggiunta di sottotitoli. 
 
 
 
