@@ -48,22 +48,22 @@ def main():
     pausedForPresence = False
 
     while videocapture.is_opened():
-        
+
         # Creo una variabile che definisce il tempo trascorso
         elapsed_time = time.time() - current_time
         current_time = time.time()
 
         # Ottengo il frame corrente e lo equalizzo
         frame = videocapture.grab_frame()
-        frame = cv2.flip(frame, +1);
+        frame = cv2.flip(frame, +1)
         videocapture.equalize_frame()
-        frame_equalized = detector.draw_face_rect()
+        detector.draw_face_rect()
 
         # Verifico che non sia stato impartito un comando di pausa con la mano
         if not pausedForHands:
 
             presence_timer = face_eyes_detector(detector, elapsed_time, presence_timer)
-             
+
             # Se non vengono rilavati gli occhi e il volto per un numero di secondi
             # il video viene messo automaticamente in pausa
             if presence_timer >= 3:
@@ -111,8 +111,7 @@ def main():
                     minDist = dist / 100 * 15  # distanza minima per avere volume zero
                     maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
 
-
-                    # Imposto il volume di riproduzione 
+                    # Imposto il volume di riproduzione
                     volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
                     player.set_volume(volume)
 
@@ -126,7 +125,7 @@ def main():
                 fingersClosed = 0
 
                 """
-                    Gesture per intorrompere/riprendere la riproduzione con la mano
+                    Gesture per interrompere/riprendere la riproduzione con la mano
                 """
 
                 # Verifico che il pollice sia aperto o chiuso
@@ -143,15 +142,15 @@ def main():
                         fingersOpened += 1
                     else:
                         fingersClosed += 1
-                
+
                 # Se la mano è chiusa completamente la riproduzione si interrompe
                 # Se la mano è aperta completamente la riproduzione riprende
                 if fingersOpened == 5:
                     player.play()
-                    pausedForHands = True
+                    pausedForHands = False
                 elif fingersClosed == 5:
                     player.pause()
-                    pausedForHands = False
+                    pausedForHands = True
 
         if ax_img is None:
             ax_img = plt.imshow(frame)
