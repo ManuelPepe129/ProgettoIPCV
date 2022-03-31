@@ -38,7 +38,7 @@ def main():
     # Metto il video in play
     player.play()
 
-    # Definisco la grandezza (x,y) della regione di interesse
+    # Definisco la grandezza (x, y) della regione d'interesse
     ROI_size = (250, 300)
 
     # Individuo i punti corrispondenti alle punte delle dita 
@@ -115,10 +115,14 @@ def main():
                     volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
                     player.set_volume(volume)
 
+                    width = int(videocapture.cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # float `width`
+
                     # Disegna a video, durante l'aggiornamento, una barra in base alla % di volume 
-                    cv2.rectangle(frame, (50, 150), (85, 400), (255, 0, 0), cv2.FILLED)
-                    cv2.rectangle(frame, (50, 150), (85, 400 - int(volume / 100 * 250)), (255, 255, 255), cv2.FILLED)
-                    cv2.putText(frame, f'{player.get_volume()}%', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0),
+                    cv2.rectangle(frame, (width - 50, 150), (width - 85, 400), (255, 0, 0), cv2.FILLED)
+                    cv2.rectangle(frame, (width - 50, 150), (width - 85, 400 - int(volume / 100 * 250)),
+                                  (255, 255, 255), cv2.FILLED)
+                    cv2.putText(frame, f'{player.get_volume()}%', (width - 40, 450), cv2.FONT_HERSHEY_COMPLEX, 1,
+                                (255, 0, 0),
                                 2)
 
                 fingersOpened = 0
