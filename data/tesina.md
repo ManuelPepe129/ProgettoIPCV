@@ -30,16 +30,16 @@
 
 ## 1. Introduzione
 
-Negli ultimi anni la necessità di applicazioni accessibili ad un numero sempre maggiore di persone ha portato allo sviluppo di nuove forme di interazioni che si inseriscono in un quadro di sviluppo molto ampio denominato "interazione multimodale". L’intento di questo progetto è quello di sfruttare l’*image processing* e la *computer vision* al fine di realizzare un’applicazione che riconosca il volto di un utente ed alcuni gesti al fine di controllare un’applicazione multimediale senza l'utilizzo di dispositivi come mouse o tastiera. In concreto, attraverso l’utilizzo di una semplice webcam sul proprio computer si può controllare la riproduzione multimediale di un video . L’applicazione multimediale di riferimento è VLC e le funzionalità, che verranno illustrate in seguito, spaziano dall’interruzione della riproduzione quando il volto dell’utente non è più rilevato all’interno dello spazio di visualizzazione della webcam fino alla modifica del volume attraverso l’utilizzo della mano. Nei prossimi capitoli verranno illustrati a fondo gli obiettivi prefissati, le funzionalità principali che si è deciso di implementare, i requisiti e infine l’implementazione vera e propria con tutte le scelte effettuate.
+Negli ultimi anni la necessità di applicazioni accessibili a un numero sempre maggiore di persone ha portato allo sviluppo di nuove forme d'interazioni che si inseriscono in un quadro di sviluppo molto ampio denominato "interazione multimodale". L’intento di questo progetto è quello di sfruttare l’*image processing* e la *computer vision* al fine di realizzare un’applicazione che riconosca il volto di un utente e alcuni gesti al fine di controllare un’applicazione multimediale senza l'utilizzo di dispositivi come mouse o tastiera. In concreto, attraverso l’utilizzo di una semplice webcam sul proprio computer si può controllare la riproduzione multimediale di un video. L’applicazione multimediale di riferimento è VLC e le funzionalità, che verranno illustrate in seguito, spaziano dall’interruzione della riproduzione quando il volto dell’utente non è più rilevato all’interno dello spazio di visualizzazione della webcam fino alla modifica del volume attraverso l’utilizzo della mano. Nei prossimi capitoli verranno illustrati a fondo gli obiettivi prefissati, le funzionalità principali che si è deciso di implementare, i requisiti e infine l’implementazione vera e propria con tutte le scelte effettuate.
 
 ## 2. Obiettivi
-Partendo da quello che volevamo fosse il risultato finale del nostro progetto, ovvero un’applicazione che permettesse ad un utente di controllare un video riprodotto su VLC attraverso delle “gestures” abbiamo definito i seguenti obiettivi per raggiungere il nostro scopo:
+Partendo da quello che volevamo fosse il risultato finale del nostro progetto, ovvero un’applicazione che permettesse a un utente di controllare un video riprodotto su VLC attraverso delle “gestures” abbiamo definito i seguenti obiettivi per raggiungere il nostro scopo:
 
 * **<u>Riconoscimento del volto</u>:** abbiamo ritenuto necessario il riconoscimento della presenza di un volto all’interno di ogni frame video, in quanto una delle funzionalità che si è deciso di implementare riguarda l’interruzione automatica del video qualora il volto dell’utente non venga rilevato. Questo perché si è immaginato che un’applicazione del genere debba tenere conto del comportamento dell’utente e debba reagire di conseguenza, anche se l’utente non ha impartito esplicitamente alcun comando. Ad esempio, se l’utente è distratto o improvvisamente qualcuno entra nella sua stanza e si gira per comunicare, il video si interrompe e riprenderà una volta che l’utente sarà di nuovo disponibile. 
 * **<u>Riconoscimento degli occhi:</u>** abbiamo ritenuto necessario il riconoscimento dell'apertura o chiusura degli occhi in quanto, qualora l’utente fosse stanco e chiudesse gli occhi, il video non avrebbe motivo di proseguire nella sua riproduzione.
 * **<u>Riconoscimento della mano:</u>** abbiamo ritenuto necessario il riconoscimento della mano, in quanto strumento attivo dell’interazione tra utente e sistema. In particolare, oltre al riconoscimento della forma completa della mano al fine di permettere all’utente di mettere in pausa la riproduzione e riavviarla (tramite una gesture che verrà illustrata in seguito), abbiamo ritenuto necessario individuare le dita per sviluppare un meccanismo di controllo del volume di riproduzione. 
 
-I comandi che abbiamo deciso di implementare sono i seguenti:
+I comandi che abbiamo deciso d'implementare sono i seguenti:
 
 - **<u>Pausa del video automatica</u>** se si esce dall'inquadratura della camera  oppure se si chiudono entrambi gli occhi per un numero di secondi stabilito.
 - **<u>Regolazione del volume</u>** in base alla distanza tra pollice e indice.
@@ -166,8 +166,6 @@ if fingersOpened == 5:
 elif fingersClosed == 5:
     player.pause()
 ```
-
-
 
 ## 6. Conclusioni e sviluppi futuri
 

@@ -10,6 +10,8 @@ import time
 from HandTracking_MediaPipe import HandDetector
 from VLCPlayer import VLCPlayer
 from videocapture import VideoCapture
+from collections import Counter
+import sys
 
 
 def main():
@@ -34,6 +36,7 @@ def main():
 
     # Creo un player con un video
     player = VLCPlayer("videos/OP001.mp4")
+    # player = VLCPlayer(sys.argv[1])
 
     # Metto il video in play
     player.play()
@@ -42,7 +45,7 @@ def main():
     ROI_size = (250, 300)
 
     # Individuo i punti corrispondenti alle punte delle dita 
-    fingerIDs = [8, 12, 16, 20]
+    fingerIDs = [4, 8, 12, 16, 20]
 
     pausedForHands = False
     pausedForPresence = False
@@ -55,7 +58,7 @@ def main():
 
         # Ottengo il frame corrente e lo equalizzo
         frame = videocapture.grab_frame()
-        frame = cv2.flip(frame, +1)
+        # frame = cv2.flip(frame, +1)
         videocapture.equalize_frame()
         detector.draw_face_rect()
 
@@ -89,72 +92,69 @@ def main():
             lmList = handDetector.findPosition(ROI, draw=False, radius=8)
 
             if len(lmList) != 0 and not handDetector.discard:
-                """
-                    Gesture per il controllo del volume 
-                """
-                # Controlli su posizione reciproca tra pollice e indice
-                # Controllo che la y dell'indice sia maggiore della y del pollice
-                if lmList[8][2] <= lmList[4][2]:
-                    # Calcolo la distanza tra pollice e indice
-                    thumb_index_distance = handDetector.findDistance(4, 8, frame)
-
-                    """
-                        Utilizzo la distanza tra il polso e il metacarpo del mignolo
-                        per normalizzare la distanza tra pollice indice
-                        senza dover avere la distanza dalla camera
-                    """
-
-                    # Calcolo la distanza tra il polso e il metacarpo del mignolo 
-                    # (per normalizzare la distanza tra pollice e indice)
-
-                    dist = handDetector.findDistance(0, 17, frame, False)
-                    minDist = dist / 100 * 15  # distanza minima per avere volume zero
-                    maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
-
-                    # Imposto il volume di riproduzione
-                    volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
-                    player.set_volume(volume)
-
-                    width = int(videocapture.cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # float `width`
-
-                    # Disegna a video, durante l'aggiornamento, una barra in base alla % di volume 
-                    cv2.rectangle(frame, (width - 50, 150), (width - 85, 400), (255, 0, 0), cv2.FILLED)
-                    cv2.rectangle(frame, (width - 50, 150), (width - 85, 400 - int(volume / 100 * 250)),
-                                  (255, 255, 255), cv2.FILLED)
-                    cv2.putText(frame, f'{player.get_volume()}%', (width - 40, 450), cv2.FONT_HERSHEY_COMPLEX, 1,
-                                (255, 0, 0),
-                                2)
-
-                fingersOpened = 0
-                fingersClosed = 0
+                fingersOpened = [False, False, False, False,
+                                 False]  # resetto l'array di booleani per il controllo delle dita
 
                 """
                     Gesture per interrompere/riprendere la riproduzione con la mano
                 """
 
-                # Verifico che il pollice sia aperto o chiuso
-                if lmList[4][1] > lmList[3][1]:
-                    fingersOpened += 1
-                else:
-                    fingersClosed += 1
-
                 # Verifico per ogni dito della mano che sia aperto o chiuso
-                for finger in fingerIDs:
-                    if fingersOpened >= 1 and fingersClosed >= 1:
-                        break
-                    elif lmList[finger][2] < lmList[finger - 2][2]:
-                        fingersOpened += 1
+                for i in range(len(fingerIDs)):
+                    if i == 0:
+                        # Verifico che il pollice sia aperto o chiuso
+                        if lmList[4][1] > lmList[3][1]:
+                            fingersOpened[0] = True
+                        else:
+                            fingersOpened[0] = False
                     else:
-                        fingersClosed += 1
+                        fingersOpened[i] = lmList[fingerIDs[i]][2] < lmList[fingerIDs[i] - 2][2]
+                    print(fingersOpened)
 
-                # Se la mano è chiusa completamente la riproduzione si interrompe
-                # Se la mano è aperta completamente la riproduzione riprende
-                if fingersOpened == 5:
+                count = Counter(fingersOpened)
+                if count[True] == 5:
+                    # Se la mano è aperta completamente la riproduzione riprende
                     player.play()
                     pausedForHands = False
-                elif fingersClosed == 5:
+                elif count[False] == 5:
+                    # Se la mano è chiusa completamente la riproduzione si interrompe
                     player.pause()
                     pausedForHands = True
+                elif fingersOpened[0] and fingersOpened[1] and count[True] == 2 and player.is_playing():
+                    """
+                        Gesture per il controllo del volume 
+                    """
+                    # Controlli su posizione reciproca tra pollice e indice
+                    # Controllo che la y dell'indice sia maggiore della y del pollice
+                    if lmList[8][2] <= lmList[4][2]:
+                        # Calcolo la distanza tra pollice e indice
+                        thumb_index_distance = handDetector.findDistance(4, 8, frame)
+
+                        """
+                            Utilizzo la distanza tra il polso e il metacarpo del mignolo
+                            per normalizzare la distanza tra pollice indice
+                            senza dover avere la distanza dalla camera
+                        """
+
+                        # Calcolo la distanza tra il polso e il metacarpo del mignolo
+                        # (per normalizzare la distanza tra pollice e indice)
+
+                        dist = handDetector.findDistance(0, 17, frame, False)
+                        minDist = dist / 100 * 15  # distanza minima per avere volume zero
+                        maxDist = dist / 100 * 150  # distanza minima per avere volume massimo
+
+                        # Imposto il volume di riproduzione
+                        volume = np.interp(thumb_index_distance, [minDist, maxDist], [0, 100])
+                        player.set_volume(volume)
+
+                        width = int(videocapture.cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # float `width`
+
+                        # Disegna a video, durante l'aggiornamento, una barra in base alla % di volume
+                        cv2.rectangle(frame, (width - 50, 150), (width - 85, 400), (255, 0, 0), cv2.FILLED)
+                        cv2.rectangle(frame, (width - 50, 150), (width - 85, 400 - int(volume / 100 * 250)),
+                                      (255, 255, 255), cv2.FILLED)
+                        cv2.putText(frame, f'{player.get_volume()}%', (width - 40, 450), cv2.FONT_HERSHEY_COMPLEX, 1,
+                                    (255, 0, 0), 2)
 
         if ax_img is None:
             ax_img = plt.imshow(frame)
