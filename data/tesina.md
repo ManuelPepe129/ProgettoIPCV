@@ -1,14 +1,14 @@
 # Relazione Progetto Moovie
 
-
-
-
-
 <img src="logo_tesina.jpg" alt="image-20220318170556955" style="zoom: 80%;"/>
 
+### Corso Image Processing & Computer Vision 2020/2021
 
 
-### **Corso Image Processing & Computer Vision 2020/2021**
+
+
+
+
 
 
 
@@ -25,6 +25,7 @@
 ##### *Marco Cupelli*
 
 
+<div style="page-break-after: always;"></div>
 
 
 
@@ -75,6 +76,8 @@ Nello sviluppo del progetto sono state realizzate le seguenti classi Python:
 * *VLCPlayer*: sfrutta la libreria *python-vlc* per interfacciarsi con *VLC media player*
 * *VideoCapture*: cattura e gestisce la webcam
 
+Il video da riprodurre può essere passato come parametro da riga di comando, altrimenti verrà caricato un video di test.
+
 ### 5.1 Riconoscimento del volto e degli occhi
 
 Nella prima parte dello sviluppo dell’applicazione ci siamo occupati del riconoscimento del volto e degli occhi e per fare ciò abbiamo utilizzato due classificatori di tipo *Haar Cascade*. A fronte di un’equalizzazione di ogni singolo frame per fornire al classificatore delle immagini classificabili con maggiore semplicità, il meccanismo di controllo del player video è molto semplice. Per fare ciò è stata realizzata la classe ***Detector***, che contiene le funzioni necessarie al riconoscimento della faccia e degli occhi.
@@ -101,7 +104,7 @@ Nella seconda parte dello sviluppo ci siamo occupati dell’individuazione della
 
 Una volta superato lo scoglio della ricerca di uno strumento affidabile abbiamo pensato di creare una finestra di controllo (ROI), di dimensioni ridotte all’interno del frame, che fosse una zona in cui l’utente potesse operare con la propria mano. Al di fuori di questa zona tutti i comandi impartiti tramite *gestures* non vengono elaborati dal sistema. Questo per evitare input accidentali nel caso in cui l'utente compia movimenti come grattarsi la testa, ecc...
 
-==**IMMAGINE ROI**==
+<img src="ROI.jpg" alt="image-20220404182342894" style="zoom:33%;" />
 
 ```python
 ROI_size = (250, 300)
@@ -113,7 +116,7 @@ Per l'individuazione della mano e di *landmarks* corrispondenti alle dita è sta
 
 #### 5.2.1 Regolazione del volume
 
-Grazie all’individuazione di coordinate dell’articolazione della mano abbiamo poi realizzato un meccanismo di controllo del volume basato sulla distanza tra due dita. In particolare abbiamo considerato la distanza tra i punti $8$ (*INDEX_FINGER_TIP*) e $4$ (*THUMB_TIP*) in figura, ovvero tra la punta del pollice e la punta dell’indice. L’utente può quindi aumentare o diminuire il volume della riproduzione facendo variare la distanza tra le punte di queste due dita e successivamente lasciando la finestra di controllo. Per effettuare questa operazione è però importante che la mano sia interamente contenuta all’interno della finestra di controllo. Nel pratico, verifichiamo che le coordinate di tutti i 21 punti dell’articolazione della mano siano all’interno della finestra. Qualora un punto sia fuori dalla finestra l’operazione di modifica del volume non viene fatta partire oppure viene interrotta e l’ultimo valore fornito al sistema viene salvato. Questo semplice meccanismo permette all’utente di salvare il valore desiderato semplicemente uscendo dalla finestra di controllo. 
+Grazie all’individuazione di coordinate dell’articolazione della mano abbiamo poi realizzato un meccanismo di controllo del volume basato sulla distanza tra due dita. In particolare abbiamo considerato la distanza tra i punti $8$ (*INDEX_FINGER_TIP*) e $4$ (*THUMB_TIP*) in figura, ovvero tra la punta del pollice e la punta dell’indice. L’utente può quindi aumentare o diminuire il volume della riproduzione facendo variare la distanza tra le punte di queste due dita e successivamente lasciando la finestra di controllo. Per effettuare questa operazione è però importante che la mano sia interamente contenuta all’interno della finestra di controllo e che l'indice e il pollice siano le uniche dita aperte. Nel pratico, verifichiamo che le coordinate di tutti i 21 punti dell’articolazione della mano siano all’interno della finestra. Qualora un punto sia fuori dalla finestra l’operazione di modifica del volume non viene fatta partire oppure viene interrotta e l’ultimo valore fornito al sistema viene salvato. Questo semplice meccanismo permette all’utente di salvare il valore desiderato semplicemente uscendo dalla finestra di controllo. 
 
 La distanza discussa in precedenza è stata poi normalizzata basandosi su un’altra distanza sperimentalmente più stabile, ovvero quella tra il punto $0$ (*WRIST*) corrispondente al polso, e il punto $17$ (*PINKY_MCP*), metacarpo del mignolo. In questo modo il calcolo del volume è meno suscettibile alla distanza dalla videocamera, quindi mantenendo le dita alla stessa distanza (tra loro) e allontanandoci dalla webcam il valore percentuale di volume rimane quasi costante. Per stabilire la percentuale di volume da impostare abbiamo definito un certo intervallo, corrispondente al $15\%$ e al $150\%$ della distanza tra i due punti di cui abbiamo parlato, oltre il quale il volume viene impostato a zero o al massimo.
 
@@ -136,16 +139,15 @@ Infine abbiamo introdotto una barra all’interno dell’interfaccia che mostra 
 Il blocco della riproduzione e la ripresa vengono gestiti mediante l'apertura e la chiusura della mano. In particolare, il video viene messo in pausa alla chiusura della mano, e riprodotto nuovamente quando viene aperta. Il riconoscimento della chiusura della mano è basato sullo studio della posizione sulla coordinata $y$ della punta di ogni dito e la relativa giunzione tra falange prossimale e intermedia. Considerando la posizione della mano con il palmo rivolto verso lo schermo e le dita verso l'alto, si può quindi dire che il singolo dito è chiuso su se stesso quando la posizione y della punta è minore di quella della relativa giunzione tra falange prossimale e intermedia. 
 
 ```python
-fingerIDs = [8, 12, 16, 20] # landmarks delle punte delle dita
+fingerIDs = [4, 8, 12, 16, 20] # landmarks delle punte delle dita
 ...
-for finger in fingerIDs:
-    if fingersOpened >= 1 and fingersClosed >= 1:
-        # ho trovato almeno un dito aperto e uno chiuso
-        break # esco
-	elif lmList[finger][2] < lmList[finger - 2][2]:
-        fingersOpened += 1 # dito aperto
-	else:
-        fingersClosed += 1 # dito chiuso
+# Verifico per ogni dito della mano che sia aperto o chiuso
+	for i in range(len(fingerIDs)):
+        if i == 0:
+            # Verifico che il pollice sia aperto o chiuso
+            ...
+         else:
+            fingersOpened[i] = lmList[fingerIDs[i]][2] < lmList[fingerIDs[i] - 2][2]
 ```
 
 Questo controllo non è però applicabile al pollice perché la posizione risultante non sarebbe naturale. Infatti considerando una mano chiusa a pugno, il pollice risulta piegato verso il palmo e non verso il basso. Quindi si è optato per un controllo analogo a quello visto precedentemente ma basato sulle coordinate $x$. 
@@ -153,17 +155,20 @@ Questo controllo non è però applicabile al pollice perché la posizione risult
 ```python
  # controllo che il pollice sia aperto o chiuso
 	if lmList[4][1] > lmList[3][1]:
-    	fingersOpened += 1 # pollice aperto
+        fingersOpened[0] = True # pollice aperto
     else:
-        fingersClosed += 1 # pollice chiuso
+        fingersOpened[0] = False # pollice chiuso
 ```
 
 In conclusione, se il numero di dita aperte (o chiuse) è $5$ possiamo concludere che la mano è aperta (o chiusa), e quindi procedere alla riproduzione (o pausa) del video.
 
 ```python
-if fingersOpened == 5:
+count = Counter(fingersOpened)
+if count[True] == 5:
+    # Se la mano è aperta completamente la riproduzione riprende
     player.play()
-elif fingersClosed == 5:
+elif count[False] == 5:
+    # Se la mano è chiusa completamente la riproduzione si interrompe
     player.pause()
 ```
 
