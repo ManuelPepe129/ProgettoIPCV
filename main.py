@@ -35,8 +35,11 @@ def main():
     current_time = time.time()
 
     # Creo un player con un video
-    player = VLCPlayer("videos/OP001.mp4")
-    # player = VLCPlayer(sys.argv[1])
+    if len(sys.argv) > 1:
+        player = VLCPlayer(sys.argv[1])
+    else:
+        player = VLCPlayer("videos/videoplayback.mp4")
+
 
     # Metto il video in play
     player.play()
@@ -58,6 +61,7 @@ def main():
 
         # Ottengo il frame corrente e lo equalizzo
         frame = videocapture.grab_frame()
+
         # frame = cv2.flip(frame, +1)
         videocapture.equalize_frame()
         detector.draw_face_rect()
@@ -109,7 +113,6 @@ def main():
                             fingersOpened[0] = False
                     else:
                         fingersOpened[i] = lmList[fingerIDs[i]][2] < lmList[fingerIDs[i] - 2][2]
-                    print(fingersOpened)
 
                 count = Counter(fingersOpened)
                 if count[True] == 5:
@@ -153,8 +156,10 @@ def main():
                         cv2.rectangle(frame, (width - 50, 150), (width - 85, 400), (255, 0, 0), cv2.FILLED)
                         cv2.rectangle(frame, (width - 50, 150), (width - 85, 400 - int(volume / 100 * 250)),
                                       (255, 255, 255), cv2.FILLED)
-                        cv2.putText(frame, f'{player.get_volume()}%', (width - 40, 450), cv2.FONT_HERSHEY_COMPLEX, 1,
+                        cv2.putText(frame, f'{player.get_volume()}%', (width - 65, 450), cv2.FONT_HERSHEY_COMPLEX, 1,
                                     (255, 0, 0), 2)
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         if ax_img is None:
             ax_img = plt.imshow(frame)
